@@ -1,0 +1,404 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int winning_door(void);
+void print_welcome(void);
+void print_doors(char door_1, char door_2, char door_3);
+int prompt_player_door(void);
+int compute_host_selection(int correct_door, int player_door, char door_1, char door_2, char door_3);
+void print_host_door(int host_selection);
+int prompt_player_switch_door(char door_1, char door_2, char door_3, int player_door);
+void stay_at_door(int player_door);
+void swap_to_door(int new_player_door);
+void print_time_to_reveal(void);
+void print_player_loses(void);
+void print_player_wins(void);
+char query_play_again(void);
+
+int main(void)
+{
+	srand(time(0));
+
+	char door_1 = '1';
+	char door_2 = '2';
+	char door_3 = '3';
+	int correct_door = 0;
+	int player_door = 0;
+	int host_selection = 0;
+	int new_player_door = 0;
+	char play_again = 'y';
+
+	// iterate through while play_again is 'y'
+	while (play_again == 'y')
+	{
+		// assigning variables to default values
+		door_1 = '1';
+		door_2 = '2';
+		door_3 = '3';
+		correct_door = 0;
+		player_door = 0;
+		host_selection = 0;
+		new_player_door = 0;
+
+		print_welcome();
+
+		print_doors(door_1, door_2, door_3);
+
+		correct_door = winning_door();
+
+		player_door = prompt_player_door();
+
+		printf("\n");
+
+		host_selection = compute_host_selection(correct_door, player_door, door_1, door_2, door_3);
+
+		// updating print_doors
+		if (host_selection == 1)
+		{
+			door_1 = 'x';
+		}
+		else if (host_selection == 2)
+		{
+			door_2 = 'x';
+		}
+		else if (host_selection == 3)
+		{
+			door_3 = 'x';
+		}
+
+		print_host_door(host_selection);
+
+		print_doors(door_1, door_2, door_3);
+
+		new_player_door = prompt_player_switch_door(door_1, door_2, door_3, player_door);
+		printf("\n");
+
+		// call appropriate function if condition is met
+		if (player_door == new_player_door)
+		{
+			stay_at_door(player_door);
+		}
+		else if (player_door != new_player_door)
+		{
+			swap_to_door(new_player_door);
+		}
+
+		printf("\n");
+		print_time_to_reveal();
+
+		// updating print_doors
+		if (correct_door == 1)
+		{
+			door_1 = '$';
+			door_2 = 'x';
+			door_3 = 'x';
+		}
+		else if (correct_door == 2)
+		{
+			door_1 = 'x';
+			door_2 = '$';
+			door_3 = 'x';
+		}
+		else if (correct_door == 3)
+		{
+			door_1 = 'x';
+			door_2 = 'x';
+			door_3 = '$';
+		}
+
+		print_doors(door_1, door_2, door_3);
+
+		// call appropriate function if condition is met
+		if (new_player_door == correct_door)
+		{
+			print_player_wins();
+		}
+		else
+		{
+			print_player_loses();
+		}
+		printf("\n");
+
+		play_again = query_play_again();
+
+		printf("\n");
+	}
+
+	return 0;
+}
+
+void print_welcome(void)
+{
+	printf("The Monty Hall Game Show!\n");
+	printf("-------------------------\n");
+}
+
+void print_doors(char door_1, char door_2, char door_3)
+{
+	printf("\n");
+	printf("   Door1  Door2  Door3\n");
+	printf("   +---+  +---+  +---+\n");
+	printf("   |   |  |   |  |   |\n");
+	printf("   | %c |  | %c |  | %c |\n", door_1, door_2, door_3);
+	printf("   |   |  |   |  |   |\n");
+	printf("   +---+  +---+  +---+\n");
+	printf("\n");
+}
+
+// asks player which door to start with
+int prompt_player_door(void)
+{
+	int input = 0;
+	int repeat = 0;
+
+	while ((input != 1 && input != 2 && input != 3) && repeat == 0)
+	{
+		printf("Which door does the player choose (1/2/3)? ");
+		scanf("%d", &input);
+
+		if (input != 1 && input != 2 && input != 3)
+		{
+			printf("Invalid input!\n");
+			printf("\n");
+		}
+		else
+		{
+			repeat = 1;
+		}
+	}
+
+	return input;
+}
+
+// host selection for picking one losing door
+int compute_host_selection(int correct_door, int player_door, char door_1, char door_2, char door_3)
+{
+	int result = 0;
+
+	if (correct_door == 1)
+	{
+		if (player_door == 1)
+		{
+			result = (rand() % 2) + 1;
+
+			if (result == 1)
+			{
+				result = 2;
+				door_2 = 'x';
+			}
+			else if (result == 2)
+			{
+				result = 3;
+				door_3 = 'x';
+			}
+		}
+		else if (player_door == 2)
+		{
+			result = 3;
+			door_3 = 'x';
+		}
+		else if (player_door == 3)
+		{
+			result = 2;
+			door_2 = 'x';
+		}
+	}
+	else if (correct_door == 2)
+	{
+		if (player_door == 1)
+		{
+			result = 3;
+			door_3 = 'x';
+		}
+		else if (player_door == 2)
+		{
+			result = (rand() % 2) + 1;
+
+			if (result == 1)
+			{
+				result = 1;
+				door_1 = 'x';
+			}
+			else if (result == 2)
+			{
+				result = 3;
+				door_3 = 'x';
+			}
+		}
+		else if (player_door == 3)
+		{
+			result = 1;
+			door_1 = 'x';
+		}
+	}
+	else if (correct_door == 3)
+	{
+		if (player_door == 1)
+		{
+			result = 2;
+			door_2 = 'x';
+		}
+		else if (player_door == 2)
+		{
+			result = 1;
+			door_1 = 'x';
+		}
+		else if (player_door == 3)
+		{
+			result = (rand() % 2) + 1;
+
+			if (result == 1)
+			{
+				result = 1;
+				door_1 = 'x';
+			}
+			else if (result == 2)
+			{
+				result = 2;
+				door_2 = 'x';
+			}
+		}
+	}
+	return result;
+}
+
+// random number for winning door
+int winning_door(void)
+{
+	int result = 0;
+
+	result = (rand() % 3) + 1;
+
+	return result;
+}
+
+void print_host_door(int host_selection)
+{
+	printf("The game host chooses door number %d...\n", host_selection);
+}
+
+// selection prompt for whether player wishes to switch from additional door to remaining door
+int prompt_player_switch_door(char door_1, char door_2, char door_3, int player_door)
+{
+	char result = '\0';
+	int answer = 0;
+
+	if (door_1 == 'x' && player_door == 2)
+	{
+		printf("Does the player want to switch from door 2 to 3 (y/n)? ");
+		scanf(" %c", &result);
+
+		if (result == 'y')
+		{
+			answer = 3;
+			return answer;
+		}
+	}
+	else if (door_1 == 'x' && player_door == 3)
+	{
+		printf("Does the player want to switch from door 3 to 2 (y/n)? ");
+		scanf(" %c", &result);
+
+		if (result == 'y')
+		{
+			answer = 2;
+			return answer;
+		}
+	}
+	else if (door_2 == 'x' && player_door == 1)
+	{
+		printf("Does the player want to switch from door 1 to 3 (y/n)? ");
+		scanf(" %c", &result);
+
+		if (result == 'y')
+		{
+			answer = 3;
+			return answer;
+		}
+	}
+	else if (door_2 == 'x' && player_door == 3)
+	{
+		printf("Does the player want to switch from door 3 to 1 (y/n)? ");
+		scanf(" %c", &result);
+
+		if (result == 'y')
+		{
+			answer = 1;
+			return answer;
+		}
+	}
+	else if (door_3 == 'x' && player_door == 1)
+	{
+		printf("Does the player want to switch from door 1 to 2 (y/n)? ");
+		scanf(" %c", &result);
+
+		if (result == 'y')
+		{
+			answer = 2;
+			return answer;
+		}
+	}
+	else if (door_3 == 'x' && player_door == 2)
+	{
+		printf("Does the player want to switch from door 2 to 1 (y/n)? ");
+		scanf(" %c", &result);
+
+		if (result == 'y')
+		{
+			answer = 1;
+			return answer;
+		}
+	}
+	
+	if (result != 'y')
+	{
+		answer = player_door;
+		return answer;
+	}
+
+	return answer;
+}
+
+void stay_at_door(int player_door)
+{
+	printf("Player chooses to stay with door %d...\n", player_door);
+}
+
+void swap_to_door(int new_player_door)
+{
+	printf("Player swaps to door %d...\n", new_player_door);
+}
+
+void print_time_to_reveal(void)
+{
+	printf("It's time to reveal the prizes!\n");
+}
+
+void print_player_loses(void)
+{
+	printf("Oh no! The player loses!\n");
+}
+
+void print_player_wins(void)
+{
+	printf("Congratulations! The player wins!\n");
+}
+
+// prompt for whether user wishes to iterate through entire loop again or not
+char query_play_again(void)
+{
+	char result = '\0';
+
+	printf("Play again (y/n)? ");
+	scanf(" %c", &result);
+
+	if (result == 'y')
+	{
+		return 'y';
+	}
+	else
+	{
+		return 'n';
+	}
+}
